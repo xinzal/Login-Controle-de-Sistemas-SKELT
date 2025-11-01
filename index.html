@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Login - Controle de Sistemas - SKELT</title>
+<style>
+:root {
+  --primary: #003c8f;
+  --accent: #0277bd;
+  --bg: #f5f7fa;
+  --card: #fff;
+  --text: #333;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background-color:var(--bg);color:var(--text);overflow-x:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100vh}
+
+/* Banner */
+.banner-carousel{position:relative;width:100%;height:250px;overflow:hidden;border-bottom:3px solid var(--primary);border-radius:0 0 15px 15px;box-shadow:0 4px 15px rgba(0,0,0,0.2)}
+.banner-carousel img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;opacity:0;transition:opacity 1s ease-in-out}
+.banner-carousel img.active{opacity:1}
+
+/* Login Box */
+.login-box {
+  background: var(--card);
+  padding: 40px 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  margin-top: 40px;
+  width: 320px;
+  text-align: center;
+  animation: fadeInUp 1.5s ease;
+  position: relative;
+  z-index: 1;
+}
+.login-box h2 {
+  color: var(--primary);
+  margin-bottom: 25px;
+  font-size: 1.8em;
+}
+.login-box input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+}
+.login-box button {
+  width: 100%;
+  padding: 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.1em;
+  font-weight: bold;
+  box-shadow: 0 0 15px rgba(2,119,189,0.6);
+  transition: all 0.3s ease;
+  animation: pulseGlow 2s infinite;
+}
+.login-box button:hover{
+  background: var(--primary);
+  box-shadow: 0 0 25px rgba(3,155,229,0.9);
+  transform: scale(1.05);
+}
+.error {
+  color: red;
+  margin-top: 10px;
+}
+
+/* Animações */
+@keyframes pulseGlow{0%{box-shadow:0 0 10px rgba(3,155,229,0.3)}50%{box-shadow:0 0 25px rgba(3,155,229,0.8)}100%{box-shadow:0 0 10px rgba(3,155,229,0.3)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+/* Responsivo */
+@media(max-width:768px){
+  .banner-carousel{height:180px}
+  .login-box{width:90%;padding:30px}
+}
+
+/* Fundo animado */
+#bgCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<!-- Banner -->
+<div class="banner-carousel">
+  <img src="https://res.cloudinary.com/beleza-na-web/image/upload/f_auto,fl_progressive,q_auto:best/v1/vitrine/2022_11_29_10_14_40_8/9cf23f62-66b8-47d8-9871-43a216c0b5a2-skelt-banner-rosto.png" class="active">
+  <img src="https://media.fashionnetwork.com/cdn-cgi/image/fit=contain,width=1000,height=1000,format=auto/m/322a/1301/1cb1/e5b4/4963/e53f/8636/6faa/8a9f/15d8/15d8.png">
+  <img src="https://raichu-uploads.s3.amazonaws.com/companypageconfiguration_cc5a4439-560f-4646-8ed9-f8b901c49ba9.jpg">
+  <img src="https://www.vincereincorporadora.com.br/wp-content/uploads/2022/07/no-meio-do-complexo.jpg">
+</div>
+
+<!-- Login -->
+<div class="login-box">
+  <h2>Login</h2>
+  <input type="text" id="username" placeholder="Usuário">
+  <input type="password" id="password" placeholder="Senha">
+  <button onclick="login()">Entrar</button>
+  <p class="error" id="error-msg"></p>
+</div>
+
+<script>
+/* Fundo animado - ondas fluidas */
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let waves = [];
+const colors = ['rgba(3,155,229,0.3)','rgba(41,182,246,0.25)','rgba(33,150,243,0.2)'];
+
+// velocidades levemente mais lentas
+for(let i=0;i<3;i++){
+  waves.push({
+    y: canvas.height/2 + i*30,
+    amplitude: 50 + i*10,
+    wavelength: 200 + i*50,
+    speed: 0.015 + i*0.005, // ligeiramente mais lento
+    phase: 0,
+    color: colors[i]
+  });
+}
+
+function drawWave(wave){
+  ctx.beginPath();
+  for(let x=0;x<canvas.width;x+=1){
+    let y = wave.y + Math.sin((x/wave.wavelength) + wave.phase)*wave.amplitude;
+    ctx.lineTo(x,y);
+  }
+  ctx.strokeStyle = wave.color;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function animate(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  waves.forEach(wave=>{
+    wave.phase += wave.speed;
+    drawWave(wave);
+  });
+  requestAnimationFrame(animate);
+}
+animate();
+
+window.addEventListener('resize',()=>{canvas.width=window.innerWidth; canvas.height=window.innerHeight});
+
+/* Carrossel */
+const imgs=document.querySelectorAll('.banner-carousel img');
+let current=0;
+setInterval(()=>{
+  imgs[current].classList.remove('active');
+  current=(current+1)%imgs.length;
+  imgs[current].classList.add('active');
+},6000);
+
+/* Login funcional */
+function login() {
+  const user = document.getElementById('username').value;
+  const pass = document.getElementById('password').value;
+  const errorMsg = document.getElementById('error-msg');
+
+  const logins = {
+    "CorporativoSolicita": ["CorporativoSolicita@123", "https://xinzal.github.io/SITE-FABRICA4"],
+    "LetsCargo": ["LetsCargo@123", "https://xinzal.github.io/BASE-DE-DADOS-Lets-Cargo"],
+    "CorporativoGestao": ["CorporativoGestao@123", "https://xinzal.github.io/CONTROLE-SOLICITA-ES-FAB"],
+    "UNA": ["UNA@123", "https://xinzal.github.io/GEST-O-NOTAS-UNA/"],
+    "CorporativoCoberturas": ["CorporativoCoberturas@123", "https://xinzal.github.io/cadastro-coberturas-supply/"]
+  };
+
+  if(logins[user] && pass === logins[user][0]){
+    window.location.href = logins[user][1];
+  } else {
+    errorMsg.textContent = "Usuário ou senha incorretos!";
+  }
+}
+</script>
+
+</body>
+</html>
